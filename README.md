@@ -11,6 +11,6 @@
 4. In the implementation, the surrogate model is constructed by the radial basis function (RBF) method [3].
 
 ### Reference:
-1. Qi Zhang and Jiaqiao Hu: Enhancing Random Search with Surrogate Models for Continuous Optimization. Proceedings of the IEEE 15th International Conference on Automation Science and Engineering, forthcoming.
+1. Qi Zhang and Jiaqiao Hu (2019): Enhancing Random Search with Surrogate Models for Continuous Optimization. Proceedings of the IEEE 15th International Conference on Automation Science and Engineering, forthcoming.
 2. Jiaqiao Hu and Ping Hu (2011): Annealing adaptive search, cross-entropy, and stochastic approximation in global optimization. Naval Research Logistics 58(5):457-477.
 3. Gutmann HM (2001): A radial basis function method for global optimization. Journal of Global Optimization 19:201-227.

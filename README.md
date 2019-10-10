@@ -2,7 +2,7 @@
 
 0. Corresponding author: Qi Zhang, Department of Applied Mathematics and Statistics, Stony Brook University, Stony Brook, NY 11794-3600
 
-1. The EARS algorithm by Qi Zhang and Jiaqiao Hu [1] is implemented for solving single-objective box-constrained expensive deterministic optimization problems.
+1. The EARS algorithm by Qi Zhang and Jiaqiao Hu [1] is implemented for solving single-objective box-constrained expensive deterministic optimization problems. Note that the implementation could be speed-up significantly by simplifying calculations and exploiting parallel computing. The current version aims at the readability.
 
 2. EARS (enhancing annealing random search) is a random search algorithm for solving Lipschitz continuous optimization problems. The algorithm samples candidate from a parameterized probability distribution over the solution space and uses the previously sampled data to fit a surrogate model of the objective function. The surrogate model is then used to modify the parameterized distribution in a way that concentrates the search on the set of high quality solutions. We prove the global convergence of the algorithm and provide numerical examples to illustrate its performance.
 

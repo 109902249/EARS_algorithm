@@ -1,6 +1,6 @@
 %--------------------------------------------------------------------------
 % Corresponding author: Qi Zhang
-% Department of Applied Mathematics and Statistics,
+% Department of Applied Mathematics and Statistics
 % Stony Brook University, Stony Brook, NY 11794-3600
 % Email: zhangqi{dot}math@gmail{dot}com
 %--------------------------------------------------------------------------
@@ -68,34 +68,12 @@ var_old=((right_bound-left_bound)/2)^2*ones(d,1);
 [eta_x_old,eta_x2_old]=...
     truncated_mean_para_fcn(left_bound,right_bound,mu_old,var_old);
 
-%% RECORDS
-cur_best_H=[]; % record all current best objective values found
-H=[]; % record all objective values sampled
-
 %% WARM UP PERIOD
 % A warm up period is performed in order to get a robust performance
 % Sobol set is used to construct the initial surrogate model
-fprintf('Warm up begins \n');
-tic; % count warm up time
-
-sobol_all=sobolset(d);
-Lambda=net(sobol_all,warm_up); % Lambda: record all sampled solutions
-Lambda=left_bound+(right_bound-left_bound)*Lambda; Lambda=Lambda';
-% D: kernel matrix for calculating the weights of the cubic surrogate model
-D=zeros(warm_up,warm_up);
-for i=1:warm_up-1
-    for j=i+1:warm_up
-        D(i,j)=norm(Lambda(:,i)-Lambda(:,j))^3;
-    end
-end
-D=D+D';
-% weight: the coefficients of the cubic surrogate model
-H(1:warm_up)=feval(fcn_name,Lambda); % objective function value
-cur_best_H(1:warm_up)=max(H(1:warm_up));
-
-weight=D\H'; % weight coefficients of the surrogate model
-fprintf('Warm up ends \n');
-tWarmUp=toc; % count warm up time
+fprintf('Warm up begins \n'); tic; % count warm up time
+[H,Lambda,D,best_H]=warm_up_fcn(d,warm_up,left_bound,right_bound,fcn_name);
+fprintf('Warm up ends \n'); tWarmUp=toc; % count warm up time
 fprintf('Warm up takes %8.4f seconds \n',tWarmUp);
 
 %% MAIN LOOP
@@ -107,12 +85,12 @@ while num_evaluation+1<=budget
     %% PROGRESS REPORT
     if mod(k,100)==0
         fprintf('iter: %5d, eval: %5d, cur best: %8.4f, true optimum: %8.4f \n',...
-            k,num_evaluation,cur_best_H(k),optimal_objective_value);
+            k,num_evaluation,best_H(k),optimal_objective_value);
     end
     k=k+1;
     
     %% ADAPTIVE HYPERPARAMETERS
-    [alpha,t,numNumInt]=adaptive_hyper_para(k,warm_up,ca,gamma0,cur_best_H(end));
+    [alpha,t,numNumInt]=adaptive_hyper_para(k,warm_up,ca,gamma0,best_H(end));
     
     %% SAMPLING
     % given the sampling parameter (mu_old,var_old)
@@ -121,9 +99,9 @@ while num_evaluation+1<=budget
     Lambda(:,k)=x_sample;
     
     %% FUNCTION EVALUATION
-    H(k)=feval(fcn_name,x_sample); % function evaluation at the sampled point
-    num_evaluation=num_evaluation+1;
-    cur_best_H(k)=max(cur_best_H(k-1),H(k));
+    cur_H=feval(fcn_name,x_sample); % function evaluation at the sampled point
+    H(k)=cur_H; num_evaluation=num_evaluation+1;
+    best_H(k)=max(best_H(k-1),cur_H);
     
     %% SURROGATE MODELING
     % given H, construct the new surrogate model 
@@ -142,16 +120,16 @@ while num_evaluation+1<=budget
     
     %% VISUALIZATION
     if mod(k,10)==0
-        plot(cur_best_H,'r-o'); % current best
+        plot(best_H,'r-o'); % current best
         hold on
-        cur_size=size(cur_best_H);
+        cur_size=size(best_H);
         optimal_line=optimal_objective_value*ones(cur_size(2),1);
         plot(optimal_line,'k:','LineWidth',5); % true optimal value
         xlabel('Number of function evaluations')
         ylabel('Objective function value')
         title(sprintf('<%s>   Iteration: %5d  Evaluation: %5d',fcn_name,k,num_evaluation));
         legend('EARS','True optimal value','Location','southeast');
-        ylim([cur_best_H(1)*1.1 -0.8]);
+        ylim([best_H(1)*1.1 -0.8]);
         grid on
         drawnow;
     end
@@ -159,7 +137,7 @@ end
 
 %% FINAL REPORT
 fprintf('iter: %5d, eval: %5d, cur best: %8.4f, true optimum: %8.4f \n',...
-    k,num_evaluation,cur_best_H(k),optimal_objective_value);
+    k,num_evaluation,best_H(k),optimal_objective_value);
 fprintf('Main loop ends \n');
 tMainLoop=toc; % count main loop time
 fprintf('Main loop takes %8.4f seconds \n',tMainLoop);
